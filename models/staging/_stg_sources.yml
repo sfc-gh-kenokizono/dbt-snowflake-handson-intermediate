@@ -1,0 +1,59 @@
+version: 2
+
+sources:
+  - name: raw
+    database: DBT_HANDSON
+    schema: RAW
+    description: "Jaffle Shop 生データ（基礎編でロード済み）"
+    
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+    
+    tables:
+      - name: raw_customers
+        description: "顧客マスター"
+        columns:
+          - name: id
+            data_tests:
+              - unique
+              - not_null
+
+      - name: raw_orders
+        description: "注文データ"
+        loaded_at_field: ordered_at
+        columns:
+          - name: id
+            data_tests:
+              - unique
+              - not_null
+          - name: customer
+            data_tests:
+              - not_null
+
+      - name: raw_items
+        description: "注文明細"
+        columns:
+          - name: id
+            data_tests:
+              - unique
+              - not_null
+
+      - name: raw_products
+        description: "商品マスター"
+        columns:
+          - name: sku
+            data_tests:
+              - unique
+              - not_null
+
+      - name: raw_stores
+        description: "店舗マスター"
+        columns:
+          - name: id
+            data_tests:
+              - unique
+              - not_null
+
+      - name: raw_supplies
+        description: "仕入れデータ"

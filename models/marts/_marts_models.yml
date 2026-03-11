@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "顧客ディメンション（dbt_utilsでサロゲートキー生成）"
+    columns:
+      - name: customer_sk
+        description: "サロゲートキー"
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "顧客ID"
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_tier
+        description: "顧客ランク"
+        data_tests:
+          - accepted_values:
+              values: ['Gold', 'Silver', 'Bronze']
+      - name: total_revenue
+        description: "総売上"
+        data_tests:
+          - positive_value
+      - name: total_profit
+        description: "総利益"
+    tests:
+      - dbt_expectations.expect_table_row_count_to_be_between:
+          min_value: 100
+          max_value: 10000
+
+  - name: fct_orders
+    description: "注文ファクト"
+    columns:
+      - name: order_sk
+        description: "サロゲートキー"
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "注文ID"
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "顧客ID"
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: order_total
+        description: "注文合計"
+        data_tests:
+          - positive_value
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 10000
