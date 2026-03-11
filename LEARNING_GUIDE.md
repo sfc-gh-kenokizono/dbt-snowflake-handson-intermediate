@@ -15,6 +15,58 @@
 
 ---
 
+# Part 0: Git Repository 設定（5分）🔗
+
+> 💡 基礎編と同じパターンです。中級編用のリポジトリを追加します。
+
+### 公開リポジトリの場合（シンプル版）
+
+```sql
+-- 中級編リポジトリを追加
+CREATE OR REPLACE GIT REPOSITORY DBT_HANDSON.INTEGRATIONS.dbt_handson_intermediate_repo
+  API_INTEGRATION = github_api_integration
+  ORIGIN = 'https://github.com/sfc-gh-kenokizono/dbt-snowflake-handson-intermediate.git';
+```
+
+### プライベートリポジトリの場合（PAT必要）
+
+> 🔐 プライベートリポジトリを使う場合は、GitHub Personal Access Token (PAT) が必要です
+> 基礎編でシークレットを作成済みの場合は、そのまま使えます。
+
+**シークレット未作成の場合:**
+
+```
+1. GitHub.com → 右上アイコン → Settings
+2. 左メニュー一番下 → Developer settings
+3. Personal access tokens → Tokens (classic)
+4. Generate new token → repo にチェック → Generate token
+```
+
+```sql
+-- シークレット作成（未作成の場合）
+CREATE OR REPLACE SECRET DBT_HANDSON.INTEGRATIONS.github_secret
+  TYPE = password
+  USERNAME = 'あなたのGitHubユーザー名'
+  PASSWORD = 'ghp_xxxxx...';  -- ここにPATを貼る
+
+-- API Integration 更新（未設定の場合）
+CREATE OR REPLACE API INTEGRATION github_api_integration
+  API_PROVIDER = git_https_api
+  API_ALLOWED_PREFIXES = ('https://github.com/dbt-labs', 'https://github.com/sfc-gh-kenokizono')
+  ALLOWED_AUTHENTICATION_SECRETS = (DBT_HANDSON.INTEGRATIONS.github_secret)
+  ENABLED = TRUE;
+```
+
+```sql
+-- プライベートリポジトリとして追加
+CREATE OR REPLACE GIT REPOSITORY DBT_HANDSON.INTEGRATIONS.dbt_handson_intermediate_repo
+  API_INTEGRATION = github_api_integration
+  GIT_CREDENTIALS = DBT_HANDSON.INTEGRATIONS.github_secret
+  ORIGIN = 'https://github.com/sfc-gh-kenokizono/dbt-snowflake-handson-intermediate.git';
+```
+
+---
+
 # Part 1: packages（15分）📦
 
 ## 🎯 今学ぶこと
