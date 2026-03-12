@@ -1,6 +1,7 @@
 # dbt
 target/
-dbt_packages/
+# NOTE: dbt_packages/ is tracked for Snowflake Native dbt compatibility
+# Native dbt requires packages pre-installed in repository
 logs/
 
 # Python
