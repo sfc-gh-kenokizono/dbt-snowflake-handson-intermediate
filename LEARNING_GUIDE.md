@@ -115,20 +115,51 @@ packages:
 | dbt_utils | 便利なマクロ集 | pivot, unpivot, generate_surrogate_key |
 | dbt_expectations | 高度なテスト | expect_column_values_to_be_between |
 
-## 1-2. packages をインストール（Snowsight）
+## 1-2. packages のインストール方法
+
+> ⚠️ **重要**: Snowflake Native dbt では、`dbt deps` を**事前にローカルで実行**し、
+> `dbt_packages/` フォルダをGitリポジトリにコミットしておく必要があります。
+
+### なぜ事前インストールが必要？
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│   CREATE DBT PROJECT 時にパッケージ検証が行われる                   │
+│   → packages.yml があるのに dbt_packages/ がないとエラー！          │
+│                                                                     │
+│   解決策: ローカルで dbt deps → dbt_packages/ をコミット           │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### ローカルでの準備（既に完了済み）
+
+```bash
+# ローカルで packages をインストール
+cd dbt-snowflake-handson-intermediate
+dbt deps
+
+# dbt_packages/ を Git にコミット
+# (.gitignore から dbt_packages/ を除外しておく)
+git add dbt_packages/
+git commit -m "Add dbt_packages for Snowflake Native dbt"
+git push
+```
+
+### Snowflake でプロジェクト作成
 
 ```sql
--- dbt プロジェクトを更新して packages をインストール
+-- Git リポジトリを最新に更新
 ALTER GIT REPOSITORY DBT_HANDSON.INTEGRATIONS.dbt_handson_intermediate_repo FETCH;
 
+-- dbt プロジェクトを作成（packages は既にリポジトリに含まれている）
 CREATE OR REPLACE DBT PROJECT DBT_HANDSON.ANALYTICS.dbt_intermediate_project
-  FROM '@DBT_HANDSON.INTEGRATIONS.dbt_handson_intermediate_repo/branches/main'
-  USING WAREHOUSE COMPUTE_WH;
-
--- deps で packages をインストール
-EXECUTE DBT PROJECT DBT_HANDSON.ANALYTICS.dbt_intermediate_project
-  ARGS = 'deps';
+  FROM '@DBT_HANDSON.INTEGRATIONS.dbt_handson_intermediate_repo/branches/main';
 ```
+
+> 💡 **このハンズオンリポジトリは既に `dbt_packages/` がコミット済み**なので、
+> 上記SQLを実行するだけでOKです！
 
 ## 1-3. dbt_utils を使ってみる
 
